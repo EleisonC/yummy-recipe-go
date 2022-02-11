@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"golang.org/x/crypto/bcrypt"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -17,7 +18,7 @@ type user struct {
 	Unemail string
 	FirstName string
 	SecondName string
-	Password string
+	Password []byte
 }
 
 var userDatabase = map[string]user{}
@@ -73,7 +74,6 @@ func signUpFunc(w http.ResponseWriter, req *http.Request) {
 		sName := req.FormValue("secondName")
 		password := req.FormValue("password")
 
-		u := user{uName, fName, sName, password}
 
 		sID, _ := uuid.NewV4()
 
@@ -93,8 +93,16 @@ func signUpFunc(w http.ResponseWriter, req *http.Request) {
 		fmt.Println(c.Value, sessionsDatabase, uName)
 		// save session
 		sessionsDatabase[c.Value] = uName
+		bs, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
+
+
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		} 
 
 		// save the user info
+		u := user{uName, fName, sName, bs}
 		userDatabase[uName] = u
 
 		// redirects to the dashboard page
@@ -124,7 +132,8 @@ func loginFunc(w http.ResponseWriter, req *http.Request) {
 		}
 
 		u := userDatabase[un]
-		if !(p == u.Password) {
+		err := bcrypt.CompareHashAndPassword(u.Password, []byte(u.Password))
+		if err != nil {
 			http.Error(w, "Username and/or password do not match", http.StatusForbidden)
 			return
 		}
