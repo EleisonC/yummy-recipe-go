@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Yummy Recipe</title>
+</head>
+<body>
+  <h1>View Recipe {{.Name}}</h1>
+  <h4>Recipe Name: {{.Name}}</h4>
+  <h4>Category: {{.Category}}</h4>
+  <h4>Description</h4>
+  {{.Description}}
+  <h4>Steps To Prepare Meal Below:</h4>
+  <ul>
+    {{range .Steps}}
+    <li>{{.}}</li>
+    {{end}}
+  </ul>
+</body>
+</html>

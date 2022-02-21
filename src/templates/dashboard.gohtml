@@ -5,14 +5,29 @@
     <title>Hello World!</title>
 </head>
 <body>
-
-{{if .Unemail}}
-    <h1>{{.FirstName}} WELCOME TO YOUR RECIPE CLOSET</h1>
-    <div>
-      create Recipies
-    </div>
-{{end}}
-
-
+  {{if .Unemail}}
+      <h1>{{.FirstName}} WELCOME TO YOUR RECIPE CLOSET</h1>
+      <h4>Below Are Your Recipies</h4>
+      <h5>BreakFast</h5>
+      {{range $key, $val := .UserRecipies.Breakfast}}
+      <li><a href="/reciepe/Breakfast/{{$key}}">{{$key}}</a></li>
+      <li><a href="/reciepe/delete/Breakfast/{{$key}}">Delete {{$key}}</a></li>
+      {{end}}
+      <h5>Lunch</h5>
+      {{range $key, $val := .UserRecipies.Lunch}}
+      <li><a href="/reciepe/Lunch/{{$key}}">{{$key}}</a></li>
+      <li><a href="/reciepe/delete/Lunch/{{$key}}">Delete {{$key}}</a></li>
+      {{end}}
+      <h5>Dinner</h5>
+      {{range $key, $val := .UserRecipies.Dinner}}
+      <li><a href="/reciepe/Dinner/{{$key}}">{{$key}}</a></li>
+      <li><a href="/reciepe/delete/Dinner/{{$key}}">Delete {{$key}}</a></li>
+      {{end}}
+      <h5>Other</h5>
+      {{range $key, $val := .UserRecipies.Other}}
+      <li><a href="/reciepe/Other/{{$key}}">{{$key}}</a></li>
+      <li><a href="/reciepe/delete/Other/{{$key}}">Delete {{$key}}</a></li>
+      {{end}}
+  {{end}}
 </body>
 </html>

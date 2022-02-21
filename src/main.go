@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/gorilla/mux"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -19,10 +20,12 @@ type user struct {
 	FirstName string
 	SecondName string
 	Password []byte
+	UserRecipies reciepeDBnew
 }
 
 var userDatabase = map[string]user{}
 var sessionsDatabase = map[string]string{}
+
 
 func init() {
 	tpl = template.Must(template.ParseGlob("templates/*"))
@@ -31,12 +34,16 @@ func init() {
 
 
 func main() {
-	http.HandleFunc("/", indexFunc)
-	http.HandleFunc("/dashboard", dashboardFunc)
-	http.HandleFunc("/signup", signUpFunc)
-	http.HandleFunc("/login", loginFunc)
-	http.HandleFunc("/logout", logoutFunc)
-	http.ListenAndServe(":8080", nil)
+	r := mux.NewRouter()
+	r.HandleFunc("/", indexFunc)
+	r.HandleFunc("/dashboard", dashboardFunc)
+	r.HandleFunc("/signup", signUpFunc)
+	r.HandleFunc("/login", loginFunc)
+	r.HandleFunc("/logout", logoutFunc)
+	r.HandleFunc("/reciepe/creation", createRecipe)
+	r.HandleFunc("/reciepe/{category}/{name}", viewReciepe)
+	r.HandleFunc("/reciepe/delete/{category}/{name}", deleteReciepe)
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func indexFunc(w http.ResponseWriter, req *http.Request) {
@@ -102,7 +109,7 @@ func signUpFunc(w http.ResponseWriter, req *http.Request) {
 		} 
 
 		// save the user info
-		u := user{uName, fName, sName, bs}
+		u := user{uName, fName, sName, bs, recipesDB}
 		userDatabase[uName] = u
 
 		// redirects to the dashboard page
@@ -132,7 +139,7 @@ func loginFunc(w http.ResponseWriter, req *http.Request) {
 		}
 
 		u := userDatabase[un]
-		err := bcrypt.CompareHashAndPassword(u.Password, []byte(u.Password))
+		err := bcrypt.CompareHashAndPassword(u.Password, []byte(p))
 		if err != nil {
 			http.Error(w, "Username and/or password do not match", http.StatusForbidden)
 			return
